@@ -7,6 +7,8 @@ import "./main.css";
 
 
 function App() {
+  const [devs, setDevs] = useState([]);
+
   const [github_username, setgithub_username] = useState('');
   const [techs, settechs] = useState('');
   const [latitude, setLatitude] = useState('');
@@ -31,19 +33,28 @@ function App() {
     )
   }, []);
 
+useEffect(() =>{
+  async function loadDevs(){
+    const response = await api.get('/devs');
+
+    setDevs(response.data);
+  }
+  loadDevs();
+}, [])
+
   async function handleadddev(e){
     e.preventDefault();
 
     const response = await api.post('/devs',{
-
       github_username,
       techs,
       latitude,
       longitude,
-
     });
 
-    console.log(response.data);
+    setgithub_username('');
+    settechs('');
+    setDevs([...devs, response.data]);
   }
 
 
@@ -79,7 +90,7 @@ function App() {
       <main>
         <ul>
           {devs.map(dev => (
-            <li className="dev-item">
+            <li key={dev._id} className="dev-item">
             <header>
               <img src={dev.avatar_url} alt={dev.name} />
               <div className="user-info">
@@ -88,7 +99,7 @@ function App() {
               </div>
             </header>
           <p>{dev.bio}</p>
-            <a href={'https://github.com/${dev.github_username}'}>Acessar Perfil do github</a>
+            <a href={`https://github.com/${dev.github_username}`}>Acessar Perfil do github</a>
           </li>
           ))}
         </ul>
